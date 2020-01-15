@@ -1,29 +1,24 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'Bempp-cl: An open-source boundary element method library with OpenCL parallelisation'
 tags:
   - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - boundary element method
+  - partial differential equations
+  - numerical analysis
 authors:
-  - name: Adrian M. Price-Whelan
-    orcid: 0000-0003-0872-7098
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
+  - name: Timo Betcke
+    orcid: 0000-0002-3323-2110
+    affiliation: 1
+  - name: Matthew Scroggs
+    orcid: 0000-0002-4658-2443
     affiliation: 2
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University
+ - name: Department of Mathematics, University College London
    index: 1
- - name: Institution 2
+ - name: Department of Engineering, University of Cambridge
    index: 2
-date: 13 August 2017
+date: 15 January 2020
 bibliography: paper.bib
-
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary
