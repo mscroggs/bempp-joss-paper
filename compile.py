@@ -3,10 +3,24 @@ import os
 
 preamble = None
 
+in_python = False
 def to_tex(line):
+    global in_python
+    if in_python:
+        if "```" in line:
+            in_python = False
+            line = line.replace("```","\\end{python}")
+        else:
+            return line
+    if line.strip() == "```python":
+        in_python = True
+        return "\\begin{python}\n"
     if line[0] == "#" and line[1] != "#":
         return "\\section{"+line[1:].strip()+"}\n"
+    if line[0] == "%":
+        return line
     line = re.sub(r"\[@([^\]]+)\]", r"\\cite{\1}", line)
+    line = re.sub(r"@([^ ]+)", r"\\cite{\1}", line)
     line = re.sub(r"``([^`]+)``", r"\\texttt{\1}", line)
     line = re.sub(r"\!\[([^\]]+)\]\(([^\)]+)\)", r"\\begin{figure}\n\\centering\\includegraphics{\2}\n\\caption{\1}\\end{figure}", line)
     line = re.sub(r"\[([^\]]+)\]\(([^\)]+)\)", r"\\underline{\1}", line)

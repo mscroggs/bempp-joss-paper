@@ -1,7 +1,8 @@
 ---
-title: 'Bempp-cl: An open-source boundary element method library with OpenCL parallelisation'
+title: 'Bempp-cl: A boundary element method library with OpenCL parallelisation'
 tags:
   - Python
+  - OpenCL
   - boundary element method
   - partial differential equations
   - numerical analysis
@@ -23,39 +24,61 @@ bibliography: paper.bib
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+The boundary element method (BEM) is a numerical method for approximating the solution of partial differential equations.
 
-``Gala`` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for ``Gala`` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. ``Gala`` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the ``Astropy`` package [@astropy] (``astropy.units`` and
-``astropy.coordinates``).
+``Bempp-cl`` is...
 
-``Gala`` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in ``Gala`` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+Assembly of all the standard integral kernels for Laplace, Helmholtz, modified Helmholtz, and electromagnetic problems.
+
+A comprehensive operator algebra that makes it easy to formulate complex product operator formulations.
+
+# OpenCL
+
+``Bempp-cl`` uses PyOpenCL [@pyopencl] to perform just-in-time compilation of its computational kernels.
+The use us OpenCL allows us to parallelise our code on a wide range of CPU and GPU devices while
+only maintaining a single code path.
+
+TODO: Say more here
+
+(cite old bempp paper?) There are two versions of Bempp available, a legacy version, which is Bempp 3.3.4, and a new development version Bempp-cl 0.1.0. The latter version is essentially feature 
+complete for the dense assembly of operators, provides advanced support for AVX2 and AVX-512 instruction sets, and supports GPUs. The advantage of the legacy version is the mature H-Matrix arithmetic 
+that allows the solution of very large problems. Currently, Bempp-cl only supports the dense assembly of operators and is therefore restricted to problems in the dimension of a few ten thousand (or 
+around 100,000 using a specific dense evaluator mode on GPUs). Support for large-scale problems is one of the main working areas for Bempp-cl. This handbook focuses completely on Bempp-cl.
+
+# Example
+
+As an example, we solve a Helmholtz scattering problem. Let $\Omega^-=\{(x,y,z):x^2+y^2+z^2\leqslant1\}$ be a unit sphere,
+let $\Gamma=\{(x,y,z):x^2+y^2+z^2=1\}$ be the boundary of the sphere and let \(\Omega^+=\mathbb{R}^3\setminus\Omega^-$ be the domain exterior to the sphere.
+We want to solve
+\begin{align*}
+\Delta u^\text{tot} + k^2u^\text{tot} &=0&&\text{in }\Omega^+,\\
+u^\text{s}&=-u^\text{inc}&&\text{on }\Gamma,\\
+\frac{\partial u^\text{s}}{\partial\left|(x,y,z)\right|}-\mathrm{i} ku^\text{s}&=o(\left|(x,y,z)\right|^{-1})&&\text{as }\left|(x,y,z)\right|\to\infty,
+\end{align*}
+where $u^\text{inc}$ is the incident wave, $u^\text{s}$ is the scattered wave, $u^\text{tot}=u^\text{inc}+u^{s}$ is the total wave, and $k$ is the wavenumber of the problem.
+In this example, we take $k=3$ and $u^\text{inc}(x,y,z)=\mathrm{e}^{\mathrm{i}kx}$.
+
+The standard boundary integral formulation [@coltonkress] of this problem is: Find $\lambda\in H^{-1/2}(\Gamma)$ such that
+\begin{align*}\left\langle\mathsf{V}\lambda,\mu\right\rangle_\Gamma&=\left\langle(\tfrac12\mathsf{Id}-\mathsf{K})u^\text{inc},\mu\right\rangle_\Gamma&&\forall\mu\in H^{-1/2}(\Gamma),\end{align*}
+where $\mathsf{V}$ is the single layer boundary operator, $\mathsf{K}$ is the double layer boundary operator, and $\mathsf{Id}$ is the identity operator. Once $\lambda$ has been found,
+the solution can be computed at points inside $\Omega^+$ using the representation formula
+$$u^\text{s}=-\mathcal{K}u^\text{inc}-\mathcal{V}\lambda,$$
+where $\mathcal{V}$ is the single layer potential operator and $\mathcal{K}$ is the double layer potential operator.
+
+```python
+import bempp.api
+import numpy as np
+
+
+```
+
+Helmholtz scattering from sphere example
+
+
 
 # Mathematics
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+Single dollars (\$) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
 
 Double dollars make self-standing equations:
 
@@ -78,7 +101,7 @@ For a quick reference, the following citation commands can be used:
 
 # Figures
 
-Figures can be included like this: ![Example figure.](figure.png)
+% Figures can be included like this: ![Example figure.](figure.png)
 
 # Acknowledgements
 
