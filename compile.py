@@ -22,7 +22,7 @@ def to_tex(line):
     line = re.sub(r"\[@([^\]]+)\]", r"\\cite{\1}", line)
     line = re.sub(r"@([^ ]+)", r"\\cite{\1}", line)
     line = re.sub(r"``([^`]+)``", r"\\texttt{\1}", line)
-    line = re.sub(r"\!\[([^\]]+)\]\(([^\)]+)\)", r"\\begin{figure}\n\\centering\\includegraphics{\2}\n\\caption{\1}\\end{figure}", line)
+    line = re.sub(r"\!\[([^\]]+)\]\(([^\)]+)\)", r"\\begin{figure}\n\\centering\\includegraphics[width=.6\\textwidth]{\2}\n\\caption{\1}\\end{figure}", line)
     line = re.sub(r"\[([^\]]+)\]\(([^\)]+)\)", r"\\underline{\1}", line)
     return line
 
