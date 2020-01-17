@@ -19,8 +19,8 @@ def to_tex(line):
         return "\\section{"+line[1:].strip()+"}\n"
     if line[0] == "%":
         return line
-    line = re.sub(r"\[@([^\]]+)\]", r"\\cite{\1}", line)
-    line = re.sub(r"@([^ ]+)", r"\\cite{\1}", line)
+    line = re.sub(r"\[@([A-Za-z0-9\-_:]+)\]", r"\\cite{\1}", line)
+    line = re.sub(r"@([A-Za-z0-9\-_:]+)", r"\\cite{\1}", line)
     line = re.sub(r"``([^`]+)``", r"\\texttt{\1}", line)
     line = re.sub(r"\!\[([^\]]+)\]\(([^\)]+)\)", r"\\begin{figure}[h]\n\\centering\\includegraphics[width=.6\\textwidth]{\2}\n\\caption{\1}\\end{figure}", line)
     line = re.sub(r"\[([^\]]+)\]\(([^\)]+)\)", r"\\underline{\1}", line)

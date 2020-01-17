@@ -24,26 +24,33 @@ bibliography: paper.bib
 
 # Summary
 
-The boundary element method (BEM) is a numerical method for approximating the solution of partial differential equations.
+The boundary element method (BEM) is a numerical method for approximating the solution of partial differential equations (PDEs).
+The method finds the approximation by discretising a boundary integral equation that can be derived from the PDE. The mathematical
+background of BEM is covered in, for example, @Stein07 or @McLean.
 
-``Bempp-cl`` is...
+``Bempp-cl`` is an open-source boundary element method library that can be used to assemble all the standard integral kernels for
+Laplace, Helmholtz, modified Helmholtz, and Maxwell problems. The library has a user-friendly Python interface that allows the
+user to use BEM to solve a variety of problems, including problems in electrostatics, acoustics and electromagnetics.
 
-Assembly of all the standard integral kernels for Laplace, Helmholtz, modified Helmholtz, and electromagnetic problems.
-
-A comprehensive operator algebra that makes it easy to formulate complex product operator formulations.
+More complex BEM formulations, such as operator preconditioned formulations, often require the assembly of the sums and products
+of discrete operators. In ``Bempp-cl``, a comprehensive operator algebra, as described in @operatoralg, is implemented. This allows
+the user to easily implement such formulations while much of the mathematical techicality involved in discretising them is dealt
+with by the operator algebra.
 
 # OpenCL
 
-``Bempp-cl`` uses PyOpenCL [@pyopencl] to perform just-in-time compilation of its computational kernels.
-The use us OpenCL allows us to parallelise our code on a wide range of CPU and GPU devices while
-only maintaining a single code path.
+Many features of the library are implented directly in Python, but computationally heavy functionality, such as the assembly of
+discrete operators, is implemented in OpenCL and uses PyOpenCL [@pyopencl] to perform just-in-time compilation. This allows the
+library to perform calculations at competitive speeds, while retaining the user-friendliness of Python.
 
-TODO: Say more here
+The use of OpenCL allows us to parallelise our code on a wide range of CPU and GPU devices while only maintaining a single code
+path. The library is split into two parts: the module ``bempp.api`` contains the Python functionality of the library, while the
+module ``bempp.core`` contains the OpenCL kernels and the Python code used to compile and call them. This separation would allow
+OpenCL to be replaced with an alternative parallel computation library with very few changes to the Python functionality in
+``bempp.api``, if this was desired in a future version.
 
-(cite old bempp paper?) There are two versions of Bempp available, a legacy version, which is Bempp 3.3.4, and a new development version Bempp-cl 0.1.0. The latter version is essentially feature 
-complete for the dense assembly of operators, provides advanced support for AVX2 and AVX-512 instruction sets, and supports GPUs. The advantage of the legacy version is the mature H-Matrix arithmetic 
-that allows the solution of very large problems. Currently, Bempp-cl only supports the dense assembly of operators and is therefore restricted to problems in the dimension of a few ten thousand (or 
-around 100,000 using a specific dense evaluator mode on GPUs). Support for large-scale problems is one of the main working areas for Bempp-cl. This handbook focuses completely on Bempp-cl.
+``Bempp-cl`` is the result a full rewrite of the previous version of Bempp [@bemppold], where the fast computational core was
+implemented in C++.
 
 # Example
 
@@ -58,7 +65,7 @@ u^\text{s}&=-u^\text{inc}&&\text{on }\Gamma,\\
 where $u^\text{inc}$ is the incident wave, $u^\text{s}$ is the scattered wave, $u^\text{tot}=u^\text{inc}+u^{s}$ is the total wave, and $k$ is the wavenumber of the problem.
 In this example, we take $k=3$ and $u^\text{inc}(x,y,z)=\mathrm{e}^{\mathrm{i}kx}$.
 
-The standard boundary integral formulation [@coltonkress] of this problem is: Find $\lambda\in H^{-1/2}(\Gamma)$ such that
+The single layer boundary integral formulation [@ColtonKress] of this problem is: Find $\lambda\in H^{-1/2}(\Gamma)$ such that
 \begin{align*}
 \left\langle\mathsf{V}\lambda,\mu\right\rangle_\Gamma&=\left\langle(\mathsf{K}-\tfrac12\mathsf{Id})u^\text{inc},\mu\right\rangle_\Gamma
 &&\forall\mu\in H^{-1/2}(\Gamma),
@@ -141,37 +148,8 @@ plt.savefig("solution.png")
 The plot obtained by this code is shown below. ![The computed solution.](solution.png)
 
 
-
-# Mathematics
-
-Single dollars (\$) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
-
-Double dollars make self-standing equations:
-
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-% Figures can be included like this: ![Example figure.](figure.png)
-
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+We acknowledge contributions from TODO.
 
 # References
