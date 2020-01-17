@@ -16,6 +16,8 @@ def to_tex(line):
         in_python = True
         return "\\begin{python}\n"
     if line[0] == "#" and line[1] != "#":
+        if line[1:].strip() == "References":
+            return "\\bibliographystyle{abbrv}\n\\bibliography{"+bib+"}\n"
         return "\\section{"+line[1:].strip()+"}\n"
     if line[0] == "%":
         return line
@@ -72,8 +74,6 @@ with open("paper.tex","w") as f:
     f.write("\\begin{document}\n")
     f.write("\\maketitle\n")
     f.write(content)
-    f.write("\\bibliographystyle{abbrv}\n")
-    f.write("\\bibliography{"+bib+"}\n")
     f.write("\\end{document}")
 
 os.system("pdflatex paper.tex")
