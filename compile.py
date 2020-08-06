@@ -4,6 +4,14 @@ import os
 preamble = None
 
 in_python = False
+
+def escape_texttt(m):
+    text = m.group(1).replace("_", "\\_")
+    return "\\texttt{" + text + "}"
+
+def escape_pyth(m):
+    return "\\pyth{" + m.group(1) + "}"
+
 def to_tex(line):
     global in_python
     if in_python:
@@ -15,6 +23,8 @@ def to_tex(line):
     if line.strip() == "```python":
         in_python = True
         return "\\begin{python}\n"
+    if line[:2] == "##" and line[2] != "#":
+        return "\\subsection{"+line[2:].strip()+"}\n"
     if line[0] == "#" and line[1] != "#":
         if line[1:].strip() == "References":
             return "\\bibliographystyle{abbrv}\n\\bibliography{"+bib+"}\n"
@@ -23,8 +33,8 @@ def to_tex(line):
         return line
     line = re.sub(r"\[@([A-Za-z0-9\-_:]+)\]", r"\\cite{\1}", line)
     line = re.sub(r"@([A-Za-z0-9\-_:]+)", r"\\cite{\1}", line)
-    line = re.sub(r"``([^`]+)``", r"\\texttt{\1}", line)
-    line = re.sub(r"`([^`]+)`", r"\\pyth{\1}", line)
+    line = re.sub(r"``([^`]+)``", escape_texttt, line)
+    line = re.sub(r"`([^`]+)`", escape_pyth, line)
     line = re.sub(r"\!\[([^\]]+)\]\(([^\)]+)\)", r"\\begin{figure}[h]\n\\centering\\includegraphics[width=.6\\textwidth]{\2}\n\\caption{\1}\\end{figure}", line)
     line = re.sub(r"\[([^\]]+)\]\(([^\)]+)\)", r"\\underline{\1}", line)
     return line

@@ -1,5 +1,5 @@
 ---
-title: 'Bempp-cl: A boundary element method library with OpenCL parallelisation'
+title: 'Bempp: Boundary element method Python package'
 tags:
   - Python
   - OpenCL
@@ -10,7 +10,7 @@ authors:
   - name: Timo Betcke
     orcid: 0000-0002-3323-2110
     affiliation: 1
-  - name: Matthew Scroggs
+  - name: Matthew W. Scroggs
     orcid: 0000-0002-4658-2443
     affiliation: 2
 affiliations:
@@ -28,33 +28,91 @@ The boundary element method (BEM) is a numerical method for approximating the so
 The method finds the approximation by discretising a boundary integral equation that can be derived from the PDE. The mathematical
 background of BEM is covered in, for example, @Stein07 or @McLean.
 
-``Bempp-cl`` is an open-source boundary element method library that can be used to assemble all the standard integral kernels for
+Bempp is an open-source boundary element method library that can be used to assemble all the standard integral kernels for
 Laplace, Helmholtz, modified Helmholtz, and Maxwell problems. The library has a user-friendly Python interface that allows the
 user to use BEM to solve a variety of problems, including problems in electrostatics, acoustics and electromagnetics.
 
-More complex BEM formulations, such as operator preconditioned formulations, often require the assembly of the sums and products
-of discrete operators. In ``Bempp-cl``, a comprehensive operator algebra, as described in @operatoralg, is implemented. This allows
-the user to easily implement such formulations while much of the mathematical techicality involved in discretising them is dealt
-with by the operator algebra.
+Bempp began life as BEM++, and was a Python library with a fast C++ computational core. The ++ slowly transitioned into pp as
+functionality gradually moved from C++ to Python. The latest version, ``bempp-cl``, is a complete rewrite of the library, with
+the C++ core replaced by just-in-time compiled OpenCL kernels, and has many improvements over past versions of the library.
 
-# OpenCL
+In this paper, we give an overview of the functionality of Bempp and present highlights of the library's recent developments.
+An overview of the original version of the library is presented in @bemppold. Full documentation of the library can be found
+online at ``bempp.com`` and in @bempphandbook.
 
-Many features of the library are implented directly in Python, but computationally heavy functionality, such as the assembly of
-discrete operators, is implemented in OpenCL and uses PyOpenCL [@pyopencl] to perform just-in-time compilation. This allows the
-library to perform calculations at competitive speeds, while retaining the user-friendliness of Python.
+# An overview of Bempp features
+Bempp is divided into two parts: `bempp.api` and `bempp.core`.
+The user interface of the library is contained in `bempp.api`.
+The core assembly routines of the library are contained in `bempp.core`. The majority of users of Bempp are unlikely to need
+to directly interact with the functionality in `bempp.core`.
 
-The use of OpenCL allows us to parallelise our code on a wide range of CPU and GPU devices while only maintaining a single code
-path. The library is split into two parts: the module ``bempp.api`` contains the Python functionality of the library, while the
-module ``bempp.core`` contains the OpenCL kernels and the Python code used to compile and call them. This separation would allow
-OpenCL to be replaced with an alternative parallel computation library with very few changes to the Python functionality in
-``bempp.api``, if this was desired in a future version.
+There are five main steps that are commonly taken when solving a problem with BEM.
+First a grid (or mesh) must be created on which to solve the problem.
+Then finite dimensional function spaces are defined on this grid.
+These function spaces are then used to discretise the boundary operators of the formulation of problem being solved,
+and appropriate right-hand-side data is computed in a space.
+A linear solver is then use to solve the discrete problem on the boundary.
+Finally, potential operators can be used to evaluate the solution at points in the domain.
 
-``Bempp-cl`` is the result a full rewrite of the previous version of Bempp [@bemppold], where the fast computational core was
-implemented in C++.
+The submodule `bempp.api.shapes` contains the definitions of a number of shapes. From these, grids with various element
+sizes can be created internally using Gmsh [@gmsh]. Alternatively, meshes can be imported from many formats using the
+meshio library [@meshio].
 
-# Example
+Bempp contains piecewise constant and piecewise linear (continuous and discontinuous) function spaces for solving scalar problems.
+For Maxwell problems, Bempp can create Rao--Wilson--Glisson [@rwg] (or Raviart--Thomas [@rt]) div-conforming spaces and
+N\'ed\'elec [@nedelec] curl-conforming spaces. In addition to these, Bempp can also generate constant and linear spaces on the
+barycentric dual grid as well as Buffa--Christiansen div-conforming spaces, as described in @bc. These spaces can all be
+created using the `bempp.api.function_space` command.
 
-As an example, we solve a Helmholtz scattering problem. Let $\Omega^-=\{(x,y,z):x^2+y^2+z^2\leqslant1\}$ be a unit sphere,
+Boundary operators for Laplace, Helmholtz, modified Helmholtz and Maxwell problems can be found in the `bempp.api.operators.boundary`
+submodule, as well as sparse identity operators. For Laplace and Helmholtz problems, Bempp can create single layer, double layer,
+adjoint double layer and hypersingular operators. For Maxwell problems, both electric field and magnetic field operators can be used.
+For formulations involving the product of operators, such at Calder\'on preconditioned Maxwell problems [@maxwellbempp], Bempp
+contains an operator algebra that allows the product to be easily obtained. This operator algebra is described in detail in @operatoralg.
+
+The submodule `bempp.api.linalg` contains wrapped versions of SciPy's [@scipy] LU, CG, and GMRes solvers. By using SciPy's `LinearOperator`
+inverface, Bempp's boundary operators can easily be use with other iterative solvers.
+
+Potential operators for the evaluation at points in the domain are included in the `bempp.api.operators.potential` submodule.
+
+# Assembly in Bempp
+The most performance-critical parts of the library are the assembly of operators, and the use of assembled operators to calculate matrix-vector
+products. In this section, we look at how operators are handled internally in Bempp.
+
+## OpenCL
+The Bempp core contains OpenCL files for the assembly of boundary and potential operators. These are just-in-time compiled when needed by
+PyOpenCL [@pyopencl].
+The use of OpenCL allows Bempp to seemlessly parallelise the computation of operators on a wide range of CPU and GPU devices, while only
+maintaining a single code path.
+Dense compilation using OpenCL is Bempp's default behaviour.
+
+The OpenCL routines are contained entirely within `bempp.core` and separated from the user interface in `bempp.api`. This would allow
+for OpenCL to be replace with an alternative parallel programming model such as SYCL with very minimal changes to the Python components
+of the library, if this was desired in a future version.
+
+## Numba
+On systems without OpenCL support, or with limited OpenCL support such as recent versions of MacOS, Bempp can alternatively use Numba [@numba]
+to just-in-time compile Python-based assembly kernels. The performance of these kernels will be lower than the OpenCL kernels, as they do
+not offer the same parallel performance options, but the provide a viable alternative when OpenCL is unavailable.
+
+If Bempp cannot locate OpenCL support, it will use Numba assembly by default. When OpenCL is available, Numba assembly can be used by [[{\color{red}TODO}]].
+
+## The fast multiple method
+The OpenCL and Numba assembly routines both create dense matrices. For smaller problems this is fine, but for large problems the storage
+requirements and assembly time grow quickly. For these larger problems, the fast multipole method (FMM) can be used to quickly compute
+matrix-vector products without assembling the full dense matrix. An introduction to FMM is given in @fmm.
+
+For larger problems, Bempp can use ExaFMM [@exafmm] for operator assembly and evaluation. Use of ExaFMM can be enabled by passing the option
+`assembly="fmm"` when initialising an operator.
+
+A performance comparison of assembly and matrix-vector product computation using OpenCL, Numba, and ExaFMM is shown below.
+
+![The average time taken to discretise an operator (left) and calculate a matrix-vector product with 20 random vectors (right) using OpenCL (colour), Numba (colour), and ExaFmm (colour).](performance.png)
+
+
+# A wave scattering example
+In this section, we present the solution of an example Helmholtz scattering problem.
+Let $\Omega^-=\{(x,y,z):x^2+y^2+z^2\leqslant1\}$ be a unit sphere,
 let $\Gamma=\{(x,y,z):x^2+y^2+z^2=1\}$ be the boundary of the sphere and let \(\Omega^+=\mathbb{R}^3\setminus\Omega^-$ be the
 domain exterior to the sphere.
 We want to solve
@@ -156,7 +214,9 @@ plt.colorbar()
 plt.savefig("solution.png")
 ```
 
-The plot obtained by this code is shown below. ![The computed solution.](solution.png)
+The plot obtained by this code is shown below.
+
+![The computed solution.](solution.png)
 
 
 # Acknowledgements
