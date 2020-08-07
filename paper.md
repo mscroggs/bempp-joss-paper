@@ -107,7 +107,8 @@ For larger problems, Bempp can use ExaFMM [@exafmm] for operator assembly and ev
 
 A performance comparison of assembly and matrix-vector product computation using OpenCL, Numba, and ExaFMM is shown below.
 
-![The average time taken to discretise an operator (left) and calculate a matrix-vector product with 20 random vectors (right) using OpenCL (colour), Numba (colour), and ExaFmm (colour).](performance.png)
+![The average time taken to discretise an operator using ExaFmm (blue circles), OpenCL (orange triangles), and Numba (green squares).](performance_assembly.png)
+![The average time taken to calculate matrix-vector products with 20 random vectors (right) using ExaFmm (blue circles), OpenCL (orange triangles), and Numba (green squares).](performance_matvec.png)
 
 
 # A wave scattering example
