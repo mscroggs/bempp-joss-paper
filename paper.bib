@@ -16,54 +16,104 @@
 }
 
 @article{gmsh,
-    author={TODO},
-    title={GMSH}
+    author={C. Geuzaine and J.-F. Remacle},
+    title={Gmsh: a three-dimensional finite element mesh generator with built-in pre- and post-processing facilities},
+    journal={International Journal for Numerical Methods in Engineering},
+    volume={79},
+    number={11)},
+    pages={1309--1331}
+    year={2009}
 }
 
-@article{meshio,
-    author={TODO},
-    title={MESHIO}
+@mish{meshio,
+    author={Nico Schlömer and other contributors},
+    title={meshio: {I/O} for mesh files},
+    HOWPUBLISHED
+           = {\verb@https://github.com/nschloe/meshio@},
 }
 
 @article{rwg,
-    author={TODO},
-    title={RWG}
+AUTHOR = {S. M. Rao and D. R. Wilton and A. W. Glisson},
+     TITLE = {Electromagnetic scattering by surfaces of arbitrary shape},
+   JOURNAL = {IEEE Transactions on antennas and propagation},
+      YEAR = {1982},
+    VOLUME = {30},
+    NUMBER = {3},
+     PAGES = {409--418},
 }
 
 @article{rt,
-    author={TODO},
-    title={RT}
+    AUTHOR = {Raviart, Pierre-Arnaud and Thomas, Jean-Marie},
+    EDITOR = {Galligani, Ilio and Magenes, Enrico},
+     TITLE = {A mixed finite element method for 2nd order elliptic problems},
+ BOOKTITLE = {Mathematical aspects of finite element methods},
+     PAGES = {292--315},
+    SERIES = {Lecture Notes in Mathematics},
+    VOLUME = {606},
+      YEAR = {1977},
+ PUBLISHER = {Springer}
 }
 
 @article{nedelec,
-    author={TODO},
-    title={Nedelec}
+    AUTHOR = {N\'ed\'elec, Jean-Claude},
+     TITLE = {Mixed finite elements in {$\mathbb{R}^3$}},
+   JOURNAL = {Numerische Mathematik},
+      YEAR = {1980},
+    VOLUME = {35},
+    NUMBER = {3},
+     PAGES = {315--341},
 }
 
 @article{bc,
-    author={TODO},
-    title={BC}
+    AUTHOR = {Buffa, Annalisa and Christiansen, Snorre H.},
+     TITLE = {A dual finite element complex on the barycentric refinement},
+   JOURNAL = {Mathematics of Computation},
+    VOLUME = {76},
+    NUMBER = {260},
+     PAGES = {1743--1769},
+      YEAR = {2007},
 }
 
 @article{maxwellbempp,
-    author={TODO},
-    title={Software Framwwordks}
+     TITLE = {{Software frameworks for integral equations in electromagnetic scattering based on Calder\'{o}n identities}},
+    AUTHOR = {M. W. Scroggs and T. Betcke and E. Burman and W. \'{S}migaj and E. van 't Wout},
+      YEAR = {{2017}},
+   JOURNAL = {{Computers \& Mathematics with Applications}},
+    VOLUME = {{74}},
+    NUMBER = {{11}},
+     PAGES = {{2897--2914}},
+      NOTE = {{Proceedings of the International Conference on Computational Mathematics and Inverse Problems, On occasion of the 60th birthday of Prof. Peter Monk}},
 }
 
-@article{numba,
-    author={TODO},
-    title={Numba}
-}
-
-@article{fmm,
-    author={TODO},
-    title={FMM paper}
-}
+@inproceedings{numba,
+    author = {Lam, Siu Kwan and Pitrou, Antoine and Seibert, Stanley},
+    title = {Numba: A {LLVM}-Based {P}ython {JIT} Compiler},
+    year = {2015},
+    booktitle = {Proceedings of the Second Workshop on the LLVM Compiler Infrastructure in HPC},
+    articleno = {7},
+    numpages = {6},
+    location = {Austin, Texas},
+    series = {LLVM ’15}
+}  
 
 @article{exafmm,
-    author={TODO},
-    title={ExaFMM paper}
+  year = {2020},
+  publisher = {The Open Journal},
+  author = {Tingyu Wang and Rio Yokota and Lorena A. Barba},
+  title = {exafmm-t},
+  journal = {Submitted to Journal of Open Source Software}
 }
+
+
+@misc{hyena,
+    AUTHOR = {M. Messner and P. Urthaler and F. Rammerstorfer},
+     TITLE = {{HyENA}: Hyperbolic and Elliptic Numerical Analysis},
+      YEAR = {2020},
+HOWPUBLISHED
+           = {\verb@https://www.tugraz.at/en/institutes/am-bm/research/software/@},
+      NOTE = {[Online; accessed 2020-08-07]}
+}
+
 
 @misc{scipy,
     AUTHOR = {Eric Jones and Travis Oliphant and Pearu Peterson and others},
@@ -124,61 +174,3 @@ HOWPUBLISHED
  PUBLISHER = {Wiley},
      PAGES = {xv+270}
 }
-
-
-# TODO: adjust above reference to match format below (JOSS examples)
-
-
-@article{Pearson:2017,
-    Adsnote = {Provided by the SAO/NASA Astrophysics Data System},
-    Adsurl = {http://adsabs.harvard.edu/abs/2017arXiv170304627P},
-    Archiveprefix = {arXiv},
-    Author = {{Pearson}, S. and {Price-Whelan}, A.~M. and {Johnston}, K.~V.},
-    Eprint = {1703.04627},
-    Journal = {ArXiv e-prints},
-    Keywords = {Astrophysics - Astrophysics of Galaxies},
-    Month = mar,
-    Title = {{Gaps in Globular Cluster Streams: Pal 5 and the Galactic Bar}},
-    Year = 2017
-}
-
-@book{Binney:2008,
-    Adsnote = {Provided by the SAO/NASA Astrophysics Data System},
-    Adsurl = {http://adsabs.harvard.edu/abs/2008gady.book.....B},
-    Author = {{Binney}, J. and {Tremaine}, S.},
-    Booktitle = {Galactic Dynamics: Second Edition, by James Binney and Scott Tremaine.~ISBN 978-0-691-13026-2 (HB).~Published by Princeton University Press, Princeton, NJ USA, 2008.},
-    Publisher = {Princeton University Press},
-    Title = {{Galactic Dynamics: Second Edition}},
-    Year = 2008
-}
-
-@article{gaia,
-    author = {{Gaia Collaboration}},
-    title = "{The Gaia mission}",
-    journal = {\aap},
-    archivePrefix = "arXiv",
-    eprint = {1609.04153},
-    primaryClass = "astro-ph.IM",
-    keywords = {space vehicles: instruments, Galaxy: structure, astrometry, parallaxes, proper motions, telescopes},
-    year = 2016,
-    month = nov,
-    volume = 595,
-    doi = {10.1051/0004-6361/201629272},
-    adsurl = {http://adsabs.harvard.edu/abs/2016A%26A...595A...1G},
-}
-
-@article{astropy,
-    author = {{Astropy Collaboration}},
-    title = "{Astropy: A community Python package for astronomy}",
-    journal = {\aap},
-    archivePrefix = "arXiv",
-    eprint = {1307.6212},
-    primaryClass = "astro-ph.IM",
-    keywords = {methods: data analysis, methods: miscellaneous, virtual observatory tools},
-    year = 2013,
-    month = oct,
-    volume = 558,
-    doi = {10.1051/0004-6361/201322068},
-    adsurl = {http://adsabs.harvard.edu/abs/2013A%26A...558A..33A}
-}
-

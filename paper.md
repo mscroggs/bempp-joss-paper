@@ -95,24 +95,29 @@ On systems without OpenCL support, or with limited OpenCL support such as recent
 to just-in-time compile Python-based assembly kernels. The performance of these kernels will be lower than the OpenCL kernels, as they do
 not offer the same parallel performance options, but the provide a viable alternative when OpenCL is unavailable.
 
-If Bempp cannot locate OpenCL support, it will use Numba assembly by default. When OpenCL is available, Numba assembly can be used by [[{\color{red}TODO}]].
+If Bempp cannot locate OpenCL support, it will use Numba assembly by default. When OpenCL is available, Numba assembly can be used by
+passing the option `device_interface="numba"` when initialising an operator.
 
 ## The fast multiple method
 The OpenCL and Numba assembly routines both create dense matrices. For smaller problems this is fine, but for large problems the storage
 requirements and assembly time grow quickly. For these larger problems, the fast multipole method (FMM) can be used to quickly compute
-matrix-vector products without assembling the full dense matrix. An introduction to FMM is given in @fmm.
+matrix-vector products without assembling the full dense matrix.
 
 For larger problems, Bempp can use ExaFMM [@exafmm] for operator assembly and evaluation. Use of ExaFMM can be enabled by passing the option
 `assembly="fmm"` when initialising an operator.
 
 A performance comparison of assembly and matrix-vector product computation using OpenCL, Numba, and ExaFMM is shown below.
+It can be seen that as $h$ is reduced, the timings for OpenCL and Numba start to increase sharply,
+while those for ExaFMM remain steady. The results for ExaFMM continue to lower values of $h$: for
+these meshes both the OpenCL and Numba assemblers ran out of memory to store their dense matrices.
+For smaller problems, however, it makes sense to use a dense assembler, as the initial cost of
+setting up the FMM data structures is high.
 
 ![The average time taken to discretise an operator using ExaFmm (blue circles), OpenCL (orange triangles), and Numba (green squares).](performance_assembly.png)
 ![The average time taken to calculate matrix-vector products with 20 random vectors (right) using ExaFmm (blue circles), OpenCL (orange triangles), and Numba (green squares).](performance_matvec.png)
 
-
 # A wave scattering example
-In this section, we present the solution of an example Helmholtz scattering problem.
+In this section, we present an example use of Bempp to solve a Helmholtz scattering problem.
 Let $\Omega^-=\{(x,y,z):x^2+y^2+z^2\leqslant1\}$ be a unit sphere,
 let $\Gamma=\{(x,y,z):x^2+y^2+z^2=1\}$ be the boundary of the sphere and let \(\Omega^+=\mathbb{R}^3\setminus\Omega^-$ be the
 domain exterior to the sphere.
@@ -161,10 +166,12 @@ Next, we define the identity, single layer and double layer boundary operators, 
 term $\left\langle(\mathsf{K}-\tfrac12\mathsf{Id})u^\text{inc},\mu\right\rangle_\Gamma$. The library is designed so that
 implemention closely resembles the mathematical formulation; this is evident in the final line, where the definition of 
 `rhs` is the implementation of the term $(\mathsf{K}-\tfrac12\mathsf{Id})u^\text{inc}$.
+
+In this example, we use ExaFMM for the assembly of the operators.
 ```python
 ident = sparse.identity(space, space, space)
-dlp = helmholtz.double_layer(space, space, space, k)
-slp = helmholtz.single_layer(space, space, space, k)
+dlp = helmholtz.double_layer(space, space, space, k, assembler="fmm")
+slp = helmholtz.single_layer(space, space, space, k, assembler="fmm")
 
 
 @bempp.api.complex_callable
@@ -177,10 +184,10 @@ rhs = (dlp - 0.5 * ident) * u_inc
 ```
 
 Next we use the GMRES iterative solver to find the solution of the equation
-$\left\langle(\mathsf{K}-\tfrac12\mathsf{Id})u^\text{inc},\mu\right\rangle_\Gamma$.
+$\left\langle\mathsf{V}\lambda,\mu\right\rangle_\Gamma=\left\langle(\mathsf{K}-\tfrac12\mathsf{Id})u^\text{inc},\mu\right\rangle_\Gamma$.
 The function `bempp.api.linalg.gmres` is a wrapper around the GMRES solver from SciPy [@scipy].
 ```python
-l, info = bempp.api.linalg.gmres(slp, rhs)
+solution, info = bempp.api.linalg.gmres(slp, rhs)
 ```
 
 Finally, we define a grid of points and use the representation formula,
@@ -203,7 +210,8 @@ idx = np.sqrt(x**2 + y**2) > 1.0
 slp_pot = helmholtz_pot.single_layer(space, points[:, idx], k)
 dlp_pot = helmholtz_pot.double_layer(space, points[:, idx], k)
 res = np.real(np.exp(1j * k * points[0, idx])
-              - dlp_pot.evaluate(u_inc) - slp_pot.evaluate(l))
+              - dlp_pot.evaluate(u_inc)
+              - slp_pot.evaluate(solution))
 u_evaluated[idx] = res.flat
 u_evaluated = u_evaluated.reshape((Nx, Ny))
 
@@ -219,9 +227,9 @@ The plot obtained by this code is shown below.
 
 ![The computed solution.](solution.png)
 
-
 # Acknowledgements
-
-We acknowledge contributions from TODO.
-
+Bempp is supported by EPSRC Grants EP/I030042/1 and EP/K03829X/1.
+We would like to thank the ExaFMM team [@exafmm] for their help integrating their library into Bempp
+and the HyENA team [@hyena] at Graz University of Technology who provided definitions of the core integration rules to the project.
+    
 # References

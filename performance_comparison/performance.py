@@ -37,5 +37,7 @@ for i in range(20):
         mat @ vec
     total += t.interval
 
+bempp.api.clear_fmm_cache()
+
 with open(f"output/{prefix}_matvec_{h}", "a") as f:
     f.write(f"{total}\n")

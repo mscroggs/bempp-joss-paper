@@ -41,9 +41,10 @@ plt.plot(numba_x, numba_y, "s-")
 
 plt.legend(["ExaFMM", "OpenCL", "Numba"])
 plt.xscale("log")
+plt.yscale("log")
 plt.xlabel("$h$")
-plt.xlim(plt.xlim()[::-1])
 plt.ylabel("Time for assembly (s)")
+plt.xlim([1,0.01])
 
 plt.savefig("../performance_assembly.png")
 
@@ -66,9 +67,10 @@ plt.plot(numba_x, numba_y, "s-")
 
 plt.legend(["ExaFMM", "OpenCL", "Numba"])
 plt.xscale("log")
+plt.yscale("log")
 plt.xlabel("$h$")
-plt.xlim(plt.xlim()[::-1])
 plt.ylabel("Time for 20 matvecs (s)")
+plt.xlim([1,0.01])
 
 plt.savefig("../performance_matvec.png")
 
