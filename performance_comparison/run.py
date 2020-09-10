@@ -6,7 +6,7 @@ assert a_type in ["fmm", "opencl", "numba"]
 
 N = 5
 
-for h in [2 ** -i for i in range(1, 7)]:
+for h in [2 ** -i for i in range(1, 8)]:
     print(f"Starting {a_type} with h={h}")
     with open(f"output/{a_type}_assembly_{h}", "w") as f:
         pass
