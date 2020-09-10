@@ -26,17 +26,16 @@ bibliography: paper.bib
 
 The boundary element method (BEM) is a numerical method for approximating the solution of certain types of partial differential equations (PDEs) in homogeneous bounded or unbounded domains.
 The method finds the approximation by discretising a boundary integral equation that can be derived from the PDE. The mathematical
-background of BEM is covered in, for example, @Stein07 or @McLean. Typical applications of Bempp include electrostatic problems, acoustic and electromagnetic scattering.
+background of BEM is covered in, for example, @Stein07 or @McLean. Typical applications of Bempp include electrostatic problems, and acoustic and electromagnetic scattering.
 
 ![Solution of an electromagnetic scattering problem solved with Bempp-cl. \label{fig:maxwell}](maxwell.png)
 
 Bempp-cl is an open-source boundary element method library that can be used to assemble all the standard integral kernels for
 Laplace, Helmholtz, modified Helmholtz, and Maxwell problems. The library has a user-friendly Python interface that allows the
-user to use BEM to solve a variety of problems, including problems in electrostatics, acoustics and electromagnetics. An example is shown in Figure \autoref{fig:maxwell}.
+user to use BEM to solve a variety of problems, including problems in electrostatics, acoustics and electromagnetics. An example is shown in \autoref{fig:maxwell}.
 
-
-Bempp-cl began life as BEM++, and was a Python library with a C++ computational core. The ++ slowly transitioned into pp as
-functionality gradually moved from C++ to Python with only a few core routines remaining in C++. Bempp-cl is the culmination of efforts to fully move to Python. It is an almost complete rewrite of Bempp. The C++ core has been replaced by highly SIMD optimised just-in-time compiled OpenCL kernels, or alternatively, by just-in-time compiled Numba routines, which are automatically used on systems that do not provide OpenCL drivers. User visible functionality is strictly separated from the implementation of computational routines, making it easy to add other discretisation technologies in the future (e.g. future support for SYCL based heterogeneous compute devices).
+Bempp-cl began life as BEM++, and was a Python library with a C++ computational core. The ++ slowly changed into pp as
+functionality gradually moved from C++ to Python with only a few core routines remaining in C++. Bempp-cl is the culmination of efforts to fully move to Python. It is an almost complete rewrite of Bempp: the C++ core has been replaced by highly SIMD optimised just-in-time compiled OpenCL kernels, or alternatively, by just-in-time compiled Numba routines, which are automatically used on systems that do not provide OpenCL drivers. User visible functionality is strictly separated from the implementation of computational routines, making it easy to add other discretisation technologies in the future (e.g. future support for SYCL-based heterogeneous compute devices).
 
 In this paper, we give an overview of the functionality of Bempp-cl and present highlights of the library's recent developments.
 An overview of the original version of the library is presented in @bemppold. Full documentation of the library can be found
@@ -51,35 +50,40 @@ to directly interact with the functionality in `bempp.core`.
 
 There are five main steps that are commonly taken when solving a problem with BEM:
 
-- First a surface grid (or mesh) must be created on which to solve the problem.
-- Then finite dimensional function spaces are defined on this grid.
-- Boundary integral operators acting on the function spaces are defined.
-- The operators are discretised and the resulting linear systems solved.
-- Domain potentials and far field operators can be used to evaluate the solution away from the boundary.
+1. First a surface grid (or mesh) must be created on which to solve the problem.
+2. Finite dimensional function spaces are defined on this grid.
+3. Boundary integral operators acting on the function spaces are defined.
+4. The operators are discretised and the resulting linear systems solved.
+5. Domain potentials and far field operators can be used to evaluate the solution away from the boundary.
 
 Bempp-cl provides routines that implement each of these steps.
 
-*Grid Interface.* The submodule `bempp.api.shapes` contains the definitions of a number of shapes. From these, grids with various element
+## Grid Interface
+The submodule `bempp.api.shapes` contains the definitions of a number of shapes. From these, grids with various element
 sizes can be created internally using Gmsh [@gmsh]. Alternatively, meshes can be imported from many formats using the
 meshio library [@meshio]. Bempp-cl currently only supports flat triangle based surface meshes. Higher-order triangular meshes may be supported
 in the future.
 
-*Function Spaces.* Bempp-cl provides piecewise constant and piecewise linear (continuous and discontinuous) function spaces for solving scalar problems.
+## Function Spaces
+Bempp-cl provides piecewise constant and piecewise linear (continuous and discontinuous) function spaces for solving scalar problems.
 For Maxwell problems, Bempp can create Rao--Wilson--Glisson [@rwg] (or Raviart--Thomas [@rt]) div-conforming spaces and
-N\'ed\'elec [@nedelec] curl-conforming spaces. In addition to these, Bempp can also generate constant and linear spaces on the
+N\'{e}d\'{e}lec [@nedelec] curl-conforming spaces. In addition to these, Bempp can also generate constant and linear spaces on the
 barycentric dual grid as well as Buffa--Christiansen div-conforming spaces, as described in @bc. These spaces can all be
 created using the `bempp.api.function_space` command.
 
-*Boundary operators* for Laplace, Helmholtz, modified Helmholtz and Maxwell problems can be found in the `bempp.api.operators.boundary`
+## Boundary operators
+Boundary operators for Laplace, Helmholtz, modified Helmholtz and Maxwell problems can be found in the `bempp.api.operators.boundary`
 submodule, as well as sparse identity operators. For Laplace and Helmholtz problems, Bempp can create single layer, double layer,
 adjoint double layer and hypersingular operators. For Maxwell problems, both electric field and magnetic field operators can be used.
 For formulations involving the product of operators, such at Calder\'on preconditioned Maxwell problems [@maxwellbempp], Bempp
 contains an operator algebra that allows the product to be easily obtained. This operator algebra is described in detail in @operatoralg.
 
-  *Discretisation and solvers* Operators are assembled using OpenCL or Numba based dense assembly, or via interface to fast multipole methods (FMM, see next section). The submodule `bempp.api.linalg` contains wrapped versions of SciPy's [@scipy] LU, CG, and GMRes solvers. By using SciPy's `LinearOperator`
+## Discretisation and solvers
+Operators are assembled using OpenCL or Numba based dense assembly, or via interface to fast multipole methods (FMM, see next section). The submodule `bempp.api.linalg` contains wrapped versions of SciPy's [@scipy] LU, CG, and GMRes solvers. By using SciPy's `LinearOperator`
 interface, Bempp's boundary operators can easily be used with other iterative solvers.
 
-*Potential and far field operators* for the evaluation at points in the domain or the asymptotic behavior at infinity are included in the `bempp.api.operators.potential` and `bempp.api.operators.far_field` submodules. 
+## Potential and far field operators
+Potential and far fiels operators for the evaluation at points in the domain or the asymptotic behavior at infinity are included in the `bempp.api.operators.potential` and `bempp.api.operators.far_field` submodules. 
 
 # Assembly in Bempp-cl
 The most performance-critical parts of the library are the assembly of boundary operators, and the use of assembled operators to calculate matrix-vector
@@ -88,6 +92,7 @@ products. In this section, we look at how operators are handled internally in Be
 ## OpenCL based assembly
 The Bempp-cl core contains OpenCL kernels for the assembly of boundary and potential operators. These are just-in-time compiled when needed by
 PyOpenCL [@pyopencl]. Each OpenCL kernel exists in a non-vectorized variant that can be executed on GPUs, and vectorized kernels for SIMD CPUs. Here, we support vector widths of 4, 8 or 16 parallel operations. While the user can choose the type of kernel to run, typically this is automatically detected at runtime without user intervention necessary. Through compiler pragmas each kernel can be compiled either in single or in double precision arithmetic.
+
 The use of OpenCL allows Bempp to seemlessly parallelise the computation of operators on a wide range of CPU and GPU devices.
 Dense assembly using OpenCL is Bempp's default behaviour. We stress that while dense assembly of operators is possible on GPUs, memory requirements and GPU memory transfer limitations mean that for normal applications Bempp should be run on CPUs.
 
@@ -95,8 +100,12 @@ Dense assembly using OpenCL is Bempp's default behaviour. We stress that while d
 On systems without OpenCL support, or with limited OpenCL support such as recent versions of MacOS, Bempp can alternatively use Numba [@numba]
 to just-in-time compile Python-based assembly kernels. The performance of these kernels is lower than the OpenCL kernels as they rely on autovectorisation for SIMD, which gives lower performance than the hand-tuned low-level OpenCL kernels. But they provide a viable alternative when OpenCL is unavailable. Indeed, sparse mass matrices are always assembled using Numba as this operation is less performance critical on boundary element surface meshes. If Bempp-cl cannot locate OpenCL CPU drivers, it will use Numba assembly by default. 
 
-## Interface to Fast Multipole Methods
-The OpenCL and Numba assembly routines both create dense matrices. For problem sizes up to twenty or thirty thousand elements this is fine (depending on available memory), but the quadratic memory and computational complexity of dense assembly means that this mode does not scale to large problems. A solution is the Fast Multipole Method (FMM). It allows the approximate evaluation of matrix-vector products with boundary operators in linear memory and computational complexity without requiring to store the actual matrices. Bempp-cl provides a black-box interface to FMM libraries and can interface any FMM code that returns potentials and gradients of potentials. Bempp then applies sparse pre- and post-transformations that translate between Galerkin integrals and potential evaluation on quadrature points. Currently, we provide a concrete FMM interface to the ExaFMM library [@exafmm], a stable and highly performant C++ based FMM implementations for Laplace and low-frequency Helmholtz kernels. 
+## Interface to fast multipole methods
+The OpenCL and Numba assembly routines both create dense matrices. For problem sizes up to twenty or thirty thousand elements this is fine (depending on available memory), but the quadratic memory and computational complexity of dense assembly means that this mode does not scale to large problems. A solution is the fast multipole method (FMM). It allows the approximate evaluation of matrix-vector products with boundary operators in linear memory and computational complexity without requiring to store the actual matrices.
+
+Bempp-cl provides a black-box interface to FMM libraries and can interface any FMM code that returns potentials and gradients of potentials. Bempp then applies sparse pre- and post-transformations that translate between Galerkin integrals and potential evaluation on quadrature points.
+
+Currently, we provide a concrete FMM interface to the ExaFMM library [@exafmm], a stable and highly performant C++ based FMM implementation for Laplace and low-frequency Helmholtz kernels. 
 
 ## Further information
 
