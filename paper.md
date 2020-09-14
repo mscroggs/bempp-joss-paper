@@ -28,8 +28,6 @@ The boundary element method (BEM) is a numerical method for approximating the so
 The method finds the approximation by discretising a boundary integral equation that can be derived from the PDE. The mathematical
 background of BEM is covered in, for example, @Stein07 or @McLean. Typical applications of BEM include electrostatic problems, and acoustic and electromagnetic scattering.
 
-![Solution of an electromagnetic scattering problem solved with Bempp-cl. \label{fig:maxwell}](maxwell.png)
-
 Bempp-cl is an open-source boundary element method library that can be used to assemble all the standard integral kernels for
 Laplace, Helmholtz, modified Helmholtz, and Maxwell problems. The library has a user-friendly Python interface that allows the
 user to use BEM to solve a variety of problems, including problems in electrostatics, acoustics and electromagnetics. An example is shown in \autoref{fig:maxwell}.
